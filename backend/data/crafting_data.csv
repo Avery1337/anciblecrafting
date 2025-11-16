@@ -1,0 +1,67 @@
+output_item,output_amount,recipe_name,ingredient1,ingredient1_amount,ingredient2,ingredient2_amount,ingredient3,ingredient3_amount,ingredient4,ingredient4_amount,ingredient5,ingredient5_amount,ingredient6,ingredient6_amount,Coins,Tier,Type,Class
+Apprentice Belt,1,Apprentice Belt,Basic Leather,5,Copper Ingot,1,,,,,,,,,25,1,Belt,Mage
+Tenderfoot Belt,1,Tenderfoot Belt,Basic Leather,5,Copper Ingot,1,,,,,,,,,25,1,Belt,Ranger
+Brawler Girdle,1,Brawler Girdle,Basic Leather,5,Copper Ingot,1,,,,,,,,,25,1,Belt,Warrior
+Deacon Sash,1,Deacon Sash,Basic Cloth,10,,,,,,,,,,,25,1,Belt,Cleric
+Ring of Minor Health,1,Ring of Minor Health,Copper Ingot,1,Manarite Crystal,1,Manarite Dust,7,,,,,,,40,1,Ring,
+Ring of Minor Mana,1,Ring of Minor Mana,Copper Ingot,1,Manarite Crystal,1,Manarite Dust,7,,,,,,,40,1,Ring,
+Apprentice Robe,1,Apprentice Robe,Basic Cloth,8,,,,,,,,,,,40,1,Chest,Mage
+Apprentice Slippers,1,Apprentice Slippers,Basic Leather,2,Basic Cloth,5,,,,,,,,,25,1,Boots,Mage
+Apprentice Gloves,1,Apprentice Gloves,Basic Leather,3,Basic Cloth,8,Manarite Dust,4,,,,,,,40,1,Gloves,Mage
+Brawler Garb,1,Brawler Garb,Basic Leather,5,Basic Cloth,3,Copper Ingot,1,,,,,,,40,1,Chest,Warrior
+Brawler Boots,1,Brawler Boots,Basic Leather,5,Basic Cloth,2,,,,,,,,,25,1,Boots,Warrior
+Brawler Gauntlets,1,Brawler Gauntlets,Basic Leather,5,Basic Cloth,4,Copper Ingot,2,,,,,,,40,1,Gloves,Warrior
+Deacon Garments,1,Deacon Garments,Basic Cloth,10,,,,,,,,,,,40,1,Chest,Cleric
+Deacon Footpads,1,Deacon Footpads,Basic Leather,2,Basic Cloth,5,,,,,,,,,25,1,Boots,Cleric
+Deacon Mitts,1,Deacon Mitts,Basic Leather,2,Basic Cloth,8,Manarite Dust,4,,,,,,,40,1,Gloves,Cleric
+Tenderfoot Vest,1,Tenderfoot Vest,Basic Leather,3,Basic Cloth,3,,,,,,,,,40,1,Chest,Ranger
+Tenderfoot Treads,1,Tenderfoot Treads,Basic Leather,3,Basic Cloth,3,,,,,,,,,25,1,Boots,Ranger
+Tenderfoot Grips,1,Tenderfoot Grips,Basic Leather,5,Basic Cloth,4,,,,,,,,,40,1,Gloves,Ranger
+Arcane Bolt Staff,1,Arcane Bolt Staff,Manarite Crystal,1,Manarite Dust,5,Wooden Plank,4,,,,,,,50,0,Weapon,
+Sword,1,Sword,Copper Ingot,5,,,,,,,,,,,50,0,Weapon,
+Short Bow,1,Short Bow,Basic Cloth,1,Wooden Plank,4,,,,,,,,,50,0,Weapon,
+Apprentice Bolt Staff,1,Apprentice Bolt Staff,Manarite Crystal,2,Manarite Dust,8,Wooden Plank,8,,,,,,,50,1,Weapon,Mage
+Brawler Scimitar,1,Brawler Scimitar,Copper Ingot,7,,,,,,,,,,,50,1,Weapon,Warrior
+Deacon Rod of Smiting,1,Deacon Rod of Smiting,Manarite Crystal,2,Manarite Dust,8,Wooden Plank,8,,,,,,,50,1,Weapon,Cleric
+Tenderfoot Short Bow,1,Tenderfoot Short Bow,Basic Cloth,3,Wooden Plank,10,,,,,,,,,50,1,Weapon,Ranger
+Fighter Belt,1,Fighter Belt,Basic Leather,5,Copper Plate,1,Refined Cloth,3,,,,,,,80,2,Belt,Warrior
+Scout's Honor,1,Scout's Honor,Basic Leather,5,Copper Ingot,1,Refined Cloth,2,,,,,,,80,2,Belt,Ranger
+Conjurer Girdle,1,Conjurer Girdle,Basic Leather,3,Copper Ingot,1,Manarite Dust,12,Refined Cloth,5,,,,,80,2,Belt,Mage
+Sage Binding,1,Sage Binding,Manarite Dust,10,Refined Cloth,5,,,,,,,,,80,2,Belt,Cleric
+Seal of the Fighter,1,Seal of the Fighter,Manarite Crystal,3,Manarite Dust,12,Copper Plate,1,,,,,,,80,2,Ring,Warrior
+Scout Loop,1,Scout Loop,Manarite Crystal,3,Manarite Dust,12,Copper Plate,1,,,,,,,80,2,Ring,Archer
+Conjurer's Band,1,Conjurer's Band,Manarite Crystal,3,Manarite Dust,12,Copper Plate,1,,,,,,,80,2,Ring,Mage
+Sage's Ring,1,Sage's Ring,Manarite Crystal,3,Manarite Dust,12,Copper Plate,1,,,,,,,80,2,Ring,Cleric
+Fighter Targe,1,Fighter Targe,Copper Ingot,3,Wooden Plank,5,Copper Plate,3,Essence of Glorp,10,Essence of Zorg,10,Lich Bane Shard,5,200,2,Relic,Warrior
+Scout Badge,1,Scout Badge,Copper Ingot,1,Manarite Dust,64,Copper Plate,1,Essence of Glorp,10,Essence of Zorg,10,Lich Bane Shard,5,200,2,Relic,Ranger
+Sage Tome,1,Sage Tome,Manarite Dust,42,Wooden Plank,15,Refined Cloth,2,Essence of Glorp,10,Essence of Zorg,10,Lich Bane Shard,5,200,2,Relic,Cleric
+Conjurer's Spellbook,1,Conjurer's Spellbook,Manarite Dust,42,Wooden Plank,15,Refined Cloth,2,Essence of Glorp,10,Essence of Zorg,10,Lich Bane Shard,5,200,2,Relic,Mage
+Conjurer's Mantle,1,Conjurer's Mantle,Manarite Dust,12,Refined Cloth,6,,,,,,,,,120,2,Chest,Mage
+Conjurer Grips,1,Conjurer Grips,Basic Leather,5,Manarite Dust,10,Refined Cloth,5,,,,,,,75,2,Gloves,Mage
+Conjurer Treads,1,Conjurer Treads,Basic Leather,5,Refined Cloth,5,,,,,,,,,80,2,Boots,Mage
+Fighter Plate,1,Fighter Plate,Basic Leather,5,Basic Cloth,5,Copper Plate,5,,,,,,,120,2,Chest,Warrior
+Fighter Vambraces,1,Fighter Vambraces,Basic Leather,5,Copper Plate,2,Copper Plate,2,Refined Cloth,3,,,,,75,2,Gloves,Warrior
+Fighter's Boots,1,Fighter's Boots,Basic Leather,12,Refined Cloth,5,,,,,,,,,80,2,Boots,Warrior
+Sage Robe,1,Sage Robe,Basic Cloth,10,Manarite Dust,8,,,,,,,,,120,2,Chest,Cleric
+Touch of the Sage,1,Touch of the Sage,Basic Leather,5,Manarite Dust,8,Refined Cloth,6,,,,,,,75,2,Gloves,Cleric
+Sage Trackers,1,Sage Trackers,Basic Leather,4,Refined Cloth,6,,,,,,,,,80,2,Boots,Cleric
+Scout's Cloak,1,Scout's Cloak,Basic Leather,5,Basic Cloth,7,,,,,,,,,120,2,Chest,Ranger
+Handwraps of the Scout,1,Handwraps of the Scout,Basic Leather,8,Refined Cloth,4,,,,,,,,,75,2,Gloves,Ranger
+Scout Footpads,1,Scout Footpads,Basic Leather,10,Refined Cloth,6,,,,,,,,,80,2,Boots,Ranger
+Divine Sage Rod,1,Divine Sage Rod,Manarite Crystal,2,Manarite Dust,10,Wooden Plank,5,Copper Plate,2,,,,,160,2,Weapon,Cleric
+Shadow Scepter of the Sage,1,Shadow Scepter of the Sage,Manarite Crystal,2,Manarite Dust,10,Wooden Plank,5,Copper Plate,2,,,,,160,2,Weapon,Cleric
+Blade of the Fighter,1,Blade of the Fighter,Copper Ingot,4,Manarite Dust,10,Copper Plate,7,,,,,,,160,2,Weapon,Warrior
+Fighter's Battle Axe,1,Fighter's Battle Axe,Copper Ingot,4,Manarite Dust,10,Copper Plate,7,,,,,,,160,2,Weapon,Warrior
+Scout's Long Bow,1,Scout's Long Bow,Manarite Dust,10,Wooden Plank,12,Refined Cloth,5,,,,,,,160,2,Weapon,Ranger
+Scout's Repeater,1,Scout's Repeater,Manarite Dust,10,Wooden Plank,12,Refined Cloth,5,,,,,,,160,2,Weapon,Ranger
+Conjurer Frostbolt Staff,1,Conjurer Frostbolt Staff,Manarite Crystal,5,Manarite Dust,15,Wooden Plank,15,,,,,,,160,2,Weapon,Mage
+Conjurer Firebolt Staff,1,Conjurer Firebolt Staff,Manarite Crystal,5,Manarite Dust,15,Wooden Plank,15,,,,,,,160,2,Weapon,Mage
+Basic Cloth,1,Basic Cloth,Flax,10,,,,,,,,,,,5,1,Intermediate,
+Basic Leather,1,Basic Leather,Manarite Dust,3,Basic Cloth,1,Vesper Wing,1,,,,,,,5,1,Intermediate,
+Copper Ingot,1,Copper Ingot,Copper Ore,5,,,,,,,,,,,5,1,Intermediate,
+Manarite Crystal,1,Manarite Crystal,Manarite Dust,10,,,,,,,,,,,10,1,Intermediate,
+Manarite Dust,8,Manarite Dust (x8),Manarite Crystal,1,,,,,,,,,,,5,1,Intermediate,
+Wooden Plank,1,Wooden Plank,Wood Log,3,,,,,,,,,,,5,1,Intermediate,
+Copper Plate,1,Copper Plate,Copper Ingot,3,Manarite Dust,5,,,,,,,,,5,2,Intermediate,
+Refined Cloth,1,Refined Cloth,Basic Cloth,2,Manarite Dust,5,,,,,,,,,8,2,Intermediate,
+Bag of Grains,1,Bag of Grains,Wheat,20,,,,,,,,,,,5,1,Cooking,

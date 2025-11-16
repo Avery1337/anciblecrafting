@@ -1,0 +1,8 @@
+{
+  "name": "ancible-crafting-calc",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
