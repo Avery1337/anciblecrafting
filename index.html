@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crafting Calculator Ancible Online</title>
+    <title>Crafting Calculator - Ancible Online</title>
     <style>
         :root {
             --bg: #121212;
@@ -28,6 +28,7 @@
             margin: 0;
             height: 100vh;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         .panel {
@@ -36,7 +37,8 @@
             border-radius: 8px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            height: 100%;
+            min-height: 0;
         }
 
         .panel-header {
@@ -46,11 +48,16 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         h2 { margin: 0; font-size: 1.1rem; color: var(--accent); }
 
-        .content { padding: 15px; overflow-y: auto; flex-grow: 1; }
+        .content { 
+            padding: 15px; 
+            overflow-y: auto; 
+            flex-grow: 1; 
+        }
 
         .item-row {
             background: #252525;
@@ -62,8 +69,6 @@
             align-items: center;
             border-left: 3px solid var(--accent);
         }
-
-        .queue-item-row { cursor: help; }
 
         .qty-input {
             width: 60px;
@@ -91,15 +96,49 @@
         button.remove-btn { background: var(--remove); color: white; }
         button.clear-btn { background: none; border: 1px solid var(--remove); color: var(--remove); font-size: 0.75rem; padding: 2px 8px; }
 
-        .cost-box {
-            background: #333;
+        /* Header Boxes in the Tree Panel */
+        .summary-header-area {
             padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            background: #252525;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .cost-box {
             text-align: center;
+            margin-bottom: 15px;
         }
 
         #total-cost { font-size: 1.5rem; color: var(--gold); display: block; }
+
+        .base-materials-summary {
+            background: #121212;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .base-materials-summary h4 {
+            margin: 0 0 8px 0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--sub-text);
+            border-bottom: 1px solid #333;
+            padding-bottom: 4px;
+        }
+
+        .materials-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px 15px;
+            font-size: 0.85rem;
+        }
+
+        .mat-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dotted #333;
+        }
 
         /* Tree Styling */
         .tree-container { font-size: 0.9rem; }
@@ -121,7 +160,6 @@
         .tree-root { margin-left: 0; border-left: none; margin-bottom: 25px; }
         .tree-root > .tree-label { background: #2c2c2c; padding: 8px; border-radius: 4px; border-left: 3px solid var(--gold); }
 
-        /* Tooltip */
         #floating-tooltip {
             display: none; position: fixed; z-index: 1000; background: #1a1a1a;
             border: 1px solid var(--accent); padding: 15px; border-radius: 8px;
@@ -137,7 +175,7 @@
     <div class="panel">
         <div class="panel-header"><h2>Available Recipes</h2></div>
         <div class="content">
-            <input type="text" style="width:100%; padding:8px; margin-bottom:10px; background:#252525; border:1px solid #333; color:white;" id="search" placeholder="Search items..." oninput="renderAvailableItems()">
+            <input type="text" style="width:100%; padding:8px; margin-bottom:10px; background:#252525; border:1px solid #333; color:white; box-sizing: border-box;" id="search" placeholder="Search items..." oninput="renderAvailableItems()">
             <div id="available-items"></div>
         </div>
     </div>
@@ -152,11 +190,21 @@
 
     <div class="panel">
         <div class="panel-header"><h2>Recipe Tree Breakdown</h2></div>
-        <div class="content">
+        
+        <div class="summary-header-area">
             <div class="cost-box">
                 Total Queue Gold Cost
-                <strong id="total-cost">0.00</strong>
+                <strong id="total-cost">0.00g</strong>
             </div>
+            
+            <div class="base-materials-summary">
+                <h4>Grand Total Base Materials</h4>
+                <div id="base-materials-list" class="materials-grid">
+                    </div>
+            </div>
+        </div>
+
+        <div class="content">
             <div id="tree-root-container" class="tree-container"></div>
         </div>
     </div>
@@ -240,9 +288,9 @@
             } catch (e) { craftingQueue = {}; }
         }
 
-        // Standard Recursive Calculator for Totals
         function calculateTotalRequirements(itemName, amountNeeded, rawTotals, totalCost, path = []) {
             const recipe = recipes[itemName];
+            // If it's a base material (no recipe) or we are forcing "Manarite Dust" as a base
             if (!recipe || path.includes(itemName)) {
                 rawTotals[itemName] = (rawTotals[itemName] || 0) + amountNeeded;
                 return;
@@ -255,7 +303,6 @@
             });
         }
 
-        // Recursive Tree Builder with Gold Calculation
         function buildTreeHTML(itemName, amountNeeded, path = []) {
             const recipe = recipes[itemName];
             let goldDisplay = "";
@@ -307,13 +354,12 @@
             saveAndRender();
         }
 
-        // Tooltip logic
         function showTooltip(e, name, qty) {
             const localRaw = {}; const localCost = { value: 0 };
             calculateTotalRequirements(name, qty, localRaw, localCost);
-            let html = `<h4 style="margin:0 0 10px 0; color:var(--accent);">${name} Raw Materials</h4><ul style="list-style:none; padding:0; margin:0; font-size:0.85rem;">`;
+            let html = `<h4 style="margin:0 0 10px 0; color:var(--accent);">Batch Raw Materials</h4><ul style="list-style:none; padding:0; margin:0; font-size:0.85rem;">`;
             Object.entries(localRaw).forEach(([k, v]) => html += `<li style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${k}</span><span>${Math.ceil(v)}</span></li>`);
-            html += `</ul><div style="margin-top:10px; border-top:1px solid #333; padding-top:5px; text-align:right; color:var(--gold);">Total Batch Gold: ${localCost.value.toLocaleString()}</div>`;
+            html += `</ul><div style="margin-top:10px; border-top:1px solid #333; padding-top:5px; text-align:right; color:var(--gold);">Batch Gold: ${localCost.value.toLocaleString()}g</div>`;
             tooltip.innerHTML = html;
             tooltip.style.display = 'block';
             moveTooltip(e);
@@ -328,16 +374,19 @@
             const queueList = document.getElementById('queue-list');
             const treeContainer = document.getElementById('tree-root-container');
             const costText = document.getElementById('total-cost');
+            const materialList = document.getElementById('base-materials-list');
             
             queueList.innerHTML = '';
             treeContainer.innerHTML = '';
+            materialList.innerHTML = '';
+            
             let globalCost = { value: 0 };
             let globalRaw = {};
 
             Object.entries(craftingQueue).forEach(([name, qty]) => {
-                // Queue Row (Left side)
+                // Queue UI
                 const div = document.createElement('div');
-                div.className = 'item-row queue-item-row';
+                div.className = 'item-row';
                 div.innerHTML = `<span>${name}</span><div class="queue-controls">
                     <input type="number" class="qty-input" value="${qty}" min="1" onchange="updateQty('${name}', this.value)">
                     <button class="remove-btn" onclick="removeItem('${name}')">×</button>
@@ -347,16 +396,26 @@
                 div.onmouseleave = () => tooltip.style.display = 'none';
                 queueList.appendChild(div);
 
-                // Tree Construction (Right side)
+                // Tree UI
                 const rootNode = document.createElement('div');
                 rootNode.className = 'tree-node tree-root';
                 rootNode.innerHTML = buildTreeHTML(name, qty);
                 treeContainer.appendChild(rootNode);
 
+                // Cumulative Calculation
                 calculateTotalRequirements(name, qty, globalRaw, globalCost);
             });
 
+            // Update Gold
             costText.innerText = globalCost.value.toLocaleString(undefined, {minimumFractionDigits: 2}) + "g";
+
+            // Update Base Materials Summary
+            Object.entries(globalRaw).sort().forEach(([mat, qty]) => {
+                const matDiv = document.createElement('div');
+                matDiv.className = 'mat-item';
+                matDiv.innerHTML = `<span>${mat}</span> <strong>${Math.ceil(qty)}</strong>`;
+                materialList.appendChild(matDiv);
+            });
         }
 
         window.updateQty = (name, val) => {
