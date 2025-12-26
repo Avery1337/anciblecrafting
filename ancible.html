@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crafting Calculator - Recipe Tree with Gold</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --panel: #1e1e1e;
+            --text: #e0e0e0;
+            --accent: #bb86fc;
+            --remove: #cf6679;
+            --border: #333;
+            --sub-text: #a0a0a0;
+            --branch: #444;
+            --gold: #ffd700;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.5fr;
+            gap: 20px;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #2c2c2c;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h2 { margin: 0; font-size: 1.1rem; color: var(--accent); }
+
+        .content { padding: 15px; overflow-y: auto; flex-grow: 1; }
+
+        .item-row {
+            background: #252525;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--accent);
+        }
+
+        .queue-item-row { cursor: help; }
+
+        .qty-input {
+            width: 60px;
+            background: #121212;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            padding: 4px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        button {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover { opacity: 0.8; }
+        button.remove-btn { background: var(--remove); color: white; }
+        button.clear-btn { background: none; border: 1px solid var(--remove); color: var(--remove); font-size: 0.75rem; padding: 2px 8px; }
+
+        .cost-box {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        #total-cost { font-size: 1.5rem; color: var(--gold); display: block; }
+
+        /* Tree Styling */
+        .tree-container { font-size: 0.9rem; }
+        .tree-node { margin-left: 18px; position: relative; border-left: 1px solid var(--branch); padding-left: 15px; margin-top: 4px; }
+        .tree-node::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 10px;
+            height: 1px;
+            background: var(--branch);
+        }
+        .tree-label { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #2a2a2a; gap: 10px;}
+        .tree-label strong { color: var(--accent); }
+        .tree-label .tree-qty { color: var(--sub-text); font-style: normal; font-size: 0.8rem; }
+        .tree-label .tree-gold { color: var(--gold); font-weight: bold; font-size: 0.85rem; }
+        
+        .tree-root { margin-left: 0; border-left: none; margin-bottom: 25px; }
+        .tree-root > .tree-label { background: #2c2c2c; padding: 8px; border-radius: 4px; border-left: 3px solid var(--gold); }
+
+        /* Tooltip */
+        #floating-tooltip {
+            display: none; position: fixed; z-index: 1000; background: #1a1a1a;
+            border: 1px solid var(--accent); padding: 15px; border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9); pointer-events: none;
+            min-width: 240px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="floating-tooltip"></div>
+
+    <div class="panel">
+        <div class="panel-header"><h2>Available Recipes</h2></div>
+        <div class="content">
+            <input type="text" style="width:100%; padding:8px; margin-bottom:10px; background:#252525; border:1px solid #333; color:white;" id="search" placeholder="Search items..." oninput="renderAvailableItems()">
+            <div id="available-items"></div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Crafting Queue</h2>
+            <button class="clear-btn" id="clear-all-btn">Reset All</button>
+        </div>
+        <div class="content" id="queue-list"></div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header"><h2>Recipe Tree Breakdown</h2></div>
+        <div class="content">
+            <div class="cost-box">
+                Total Queue Gold Cost
+                <strong id="total-cost">0.00</strong>
+            </div>
+            <div id="tree-root-container" class="tree-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const recipes = {
+            "Apprentice Belt": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Copper Ingot", "qty": 1 }], "coins": 25 },
+            "Tenderfoot Belt": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Copper Ingot", "qty": 1 }], "coins": 25 },
+            "Brawler Girdle": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Copper Ingot", "qty": 1 }], "coins": 25 },
+            "Deacon Sash": { "yield": 1, "ingredients": [{ "item": "Basic Cloth", "qty": 10 }], "coins": 25 },
+            "Ring of Minor Health": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 1 }, { "item": "Manarite Crystal", "qty": 1 }, { "item": "Manarite Dust", "qty": 7 }], "coins": 40 },
+            "Ring of Minor Mana": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 1 }, { "item": "Manarite Crystal", "qty": 1 }, { "item": "Manarite Dust", "qty": 7 }], "coins": 40 },
+            "Apprentice Robe": { "yield": 1, "ingredients": [{ "item": "Basic Cloth", "qty": 8 }], "coins": 40 },
+            "Apprentice Slippers": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 2 }, { "item": "Basic Cloth", "qty": 5 }], "coins": 25 },
+            "Apprentice Gloves": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 3 }, { "item": "Basic Cloth", "qty": 8 }, { "item": "Manarite Dust", "qty": 4 }], "coins": 40 },
+            "Brawler Garb": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Basic Cloth", "qty": 3 }, { "item": "Copper Ingot", "qty": 1 }], "coins": 40 },
+            "Brawler Boots": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Basic Cloth", "qty": 2 }], "coins": 25 },
+            "Brawler Gauntlets": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Basic Cloth", "qty": 4 }, { "item": "Copper Ingot", "qty": 2 }], "coins": 40 },
+            "Deacon Garments": { "yield": 1, "ingredients": [{ "item": "Basic Cloth", "qty": 10 }], "coins": 40 },
+            "Deacon Footpads": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 2 }, { "item": "Basic Cloth", "qty": 5 }], "coins": 25 },
+            "Deacon Mitts": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 2 }, { "item": "Basic Cloth", "qty": 8 }, { "item": "Manarite Dust", "qty": 4 }], "coins": 40 },
+            "Tenderfoot Vest": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 3 }, { "item": "Basic Cloth", "qty": 3 }], "coins": 40 },
+            "Tenderfoot Treads": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 3 }, { "item": "Basic Cloth", "qty": 3 }], "coins": 25 },
+            "Tenderfoot Grips": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Basic Cloth", "qty": 4 }], "coins": 40 },
+            "Arcane Bolt Staff": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 1 }, { "item": "Manarite Dust", "qty": 5 }, { "item": "Wooden Plank", "qty": 4 }], "coins": 50 },
+            "Sword": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 5 }], "coins": 50 },
+            "Short Bow": { "yield": 1, "ingredients": [{ "item": "Basic Cloth", "qty": 1 }, { "item": "Wooden Plank", "qty": 4 }], "coins": 50 },
+            "Apprentice Bolt Staff": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 2 }, { "item": "Manarite Dust", "qty": 8 }, { "item": "Wooden Plank", "qty": 8 }], "coins": 50 },
+            "Brawler Scimitar": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 7 }], "coins": 50 },
+            "Deacon Rod of Smiting": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 2 }, { "item": "Manarite Dust", "qty": 8 }, { "item": "Wooden Plank", "qty": 8 }], "coins": 50 },
+            "Tenderfoot Short Bow": { "yield": 1, "ingredients": [{ "item": "Basic Cloth", "qty": 3 }, { "item": "Wooden Plank", "qty": 10 }], "coins": 50 },
+            "Fighter Belt": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Copper Plate", "qty": 1 }, { "item": "Refined Cloth", "qty": 3 }], "coins": 80 },
+            "Scout's Honor": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Copper Ingot", "qty": 1 }, { "item": "Refined Cloth", "qty": 2 }], "coins": 80 },
+            "Conjurer Girdle": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 3 }, { "item": "Copper Ingot", "qty": 1 }, { "item": "Manarite Dust", "qty": 12 }, { "item": "Refined Cloth", "qty": 5 }], "coins": 80 },
+            "Sage Binding": { "yield": 1, "ingredients": [{ "item": "Manarite Dust", "qty": 10 }, { "item": "Refined Cloth", "qty": 5 }], "coins": 80 },
+            "Seal of the Fighter": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 3 }, { "item": "Manarite Dust", "qty": 12 }, { "item": "Copper Plate", "qty": 1 }], "coins": 80 },
+            "Scout Loop": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 3 }, { "item": "Manarite Dust", "qty": 12 }, { "item": "Copper Plate", "qty": 1 }], "coins": 80 },
+            "Conjurer's Band": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 3 }, { "item": "Manarite Dust", "qty": 12 }, { "item": "Copper Plate", "qty": 1 }], "coins": 80 },
+            "Sage's Ring": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 3 }, { "item": "Manarite Dust", "qty": 12 }, { "item": "Copper Plate", "qty": 1 }], "coins": 80 },
+            "Fighter Targe": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 3 }, { "item": "Wooden Plank", "qty": 5 }, { "item": "Copper Plate", "qty": 3 }, { "item": "Essence of Glorp", "qty": 10 }, { "item": "Essence of Zorg", "qty": 10 }, { "item": "Lich Bane Shard", "qty": 5 }], "coins": 200 },
+            "Scout Badge": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 1 }, { "item": "Manarite Dust", "qty": 64 }, { "item": "Copper Plate", "qty": 1 }, { "item": "Essence of Glorp", "qty": 10 }, { "item": "Essence of Zorg", "qty": 10 }, { "item": "Lich Bane Shard", "qty": 5 }], "coins": 200 },
+            "Sage Tome": { "yield": 1, "ingredients": [{ "item": "Manarite Dust", "qty": 42 }, { "item": "Wooden Plank", "qty": 15 }, { "item": "Refined Cloth", "qty": 2 }, { "item": "Essence of Glorp", "qty": 10 }, { "item": "Essence of Zorg", "qty": 10 }, { "item": "Lich Bane Shard", "qty": 5 }], "coins": 200 },
+            "Conjurer's Spellbook": { "yield": 1, "ingredients": [{ "item": "Manarite Dust", "qty": 42 }, { "item": "Wooden Plank", "qty": 15 }, { "item": "Refined Cloth", "qty": 2 }, { "item": "Essence of Glorp", "qty": 10 }, { "item": "Essence of Zorg", "qty": 10 }, { "item": "Lich Bane Shard", "qty": 5 }], "coins": 200 },
+            "Conjurer's Mantle": { "yield": 1, "ingredients": [{ "item": "Manarite Dust", "qty": 12 }, { "item": "Refined Cloth", "qty": 6 }], "coins": 120 },
+            "Conjurer Grips": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Manarite Dust", "qty": 10 }, { "item": "Refined Cloth", "qty": 5 }], "coins": 75 },
+            "Conjurer Treads": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Refined Cloth", "qty": 5 }], "coins": 80 },
+            "Fighter Plate": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Basic Cloth", "qty": 5 }, { "item": "Copper Plate", "qty": 5 }], "coins": 120 },
+            "Fighter Vambraces": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Copper Plate", "qty": 2 }, { "item": "Refined Cloth", "qty": 3 }], "coins": 75 },
+            "Fighter's Boots": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 12 }, { "item": "Refined Cloth", "qty": 5 }], "coins": 80 },
+            "Sage Robe": { "yield": 1, "ingredients": [{ "item": "Basic Cloth", "qty": 10 }, { "item": "Manarite Dust", "qty": 8 }], "coins": 120 },
+            "Touch of the Sage": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Manarite Dust", "qty": 8 }, { "item": "Refined Cloth", "qty": 6 }], "coins": 75 },
+            "Sage Trackers": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 4 }, { "item": "Refined Cloth", "qty": 6 }], "coins": 80 },
+            "Scout's Cloak": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 5 }, { "item": "Basic Cloth", "qty": 7 }], "coins": 120 },
+            "Handwraps of the Scout": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 8 }, { "item": "Refined Cloth", "qty": 4 }], "coins": 75 },
+            "Scout Footpads": { "yield": 1, "ingredients": [{ "item": "Basic Leather", "qty": 10 }, { "item": "Refined Cloth", "qty": 6 }], "coins": 80 },
+            "Divine Sage Rod": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 2 }, { "item": "Manarite Dust", "qty": 10 }, { "item": "Wooden Plank", "qty": 5 }, { "item": "Copper Plate", "qty": 2 }], "coins": 160 },
+            "Shadow Scepter of the Sage": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 2 }, { "item": "Manarite Dust", "qty": 10 }, { "item": "Wooden Plank", "qty": 5 }, { "item": "Copper Plate", "qty": 2 }], "coins": 160 },
+            "Blade of the Fighter": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 4 }, { "item": "Manarite Dust", "qty": 10 }, { "item": "Copper Plate", "qty": 7 }], "coins": 160 },
+            "Fighter's Battle Axe": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 4 }, { "item": "Manarite Dust", "qty": 10 }, { "item": "Copper Plate", "qty": 7 }], "coins": 160 },
+            "Scout's Long Bow": { "yield": 1, "ingredients": [{ "item": "Manarite Dust", "qty": 10 }, { "item": "Wooden Plank", "qty": 12 }, { "item": "Refined Cloth", "qty": 5 }], "coins": 160 },
+            "Scout's Repeater": { "yield": 1, "ingredients": [{ "item": "Manarite Dust", "qty": 10 }, { "item": "Wooden Plank", "qty": 12 }, { "item": "Refined Cloth", "qty": 5 }], "coins": 160 },
+            "Conjurer Frostbolt Staff": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 5 }, { "item": "Manarite Dust", "qty": 15 }, { "item": "Wooden Plank", "qty": 15 }], "coins": 160 },
+            "Conjurer Firebolt Staff": { "yield": 1, "ingredients": [{ "item": "Manarite Crystal", "qty": 5 }, { "item": "Manarite Dust", "qty": 15 }, { "item": "Wooden Plank", "qty": 15 }], "coins": 160 },
+            "Basic Cloth": { "yield": 1, "ingredients": [{ "item": "Flax", "qty": 10 }], "coins": 5 },
+            "Basic Leather": { "yield": 1, "ingredients": [{ "item": "Manarite Dust", "qty": 3 }, { "item": "Basic Cloth", "qty": 1 }, { "item": "Vesper Wing", "qty": 1 }], "coins": 5 },
+            "Copper Ingot": { "yield": 1, "ingredients": [{ "item": "Copper Ore", "qty": 5 }], "coins": 5 },
+            "Manarite Crystal": { "yield": 1, "ingredients": [{ "item": "Manarite Dust", "qty": 10 }], "coins": 10 },
+            "Wooden Plank": { "yield": 1, "ingredients": [{ "item": "Wood Log", "qty": 3 }], "coins": 5 },
+            "Copper Plate": { "yield": 1, "ingredients": [{ "item": "Copper Ingot", "qty": 3 }, { "item": "Manarite Dust", "qty": 5 }], "coins": 5 },
+            "Refined Cloth": { "yield": 1, "ingredients": [{ "item": "Basic Cloth", "qty": 2 }, { "item": "Manarite Dust", "qty": 5 }], "coins": 8 },
+            "Bag of Grains": { "yield": 1, "ingredients": [{ "item": "Wheat", "qty": 20 }], "coins": 5 }
+        };
+
+        let craftingQueue = {};
+        const tooltip = document.getElementById('floating-tooltip');
+
+        function safeLoad() {
+            try {
+                const data = localStorage.getItem('myCraftingQueue');
+                if (data) craftingQueue = JSON.parse(data);
+            } catch (e) { craftingQueue = {}; }
+        }
+
+        // Standard Recursive Calculator for Totals
+        function calculateTotalRequirements(itemName, amountNeeded, rawTotals, totalCost, path = []) {
+            const recipe = recipes[itemName];
+            if (!recipe || path.includes(itemName)) {
+                rawTotals[itemName] = (rawTotals[itemName] || 0) + amountNeeded;
+                return;
+            }
+            const runsNeeded = Math.ceil(amountNeeded / recipe.yield);
+            totalCost.value += (recipe.coins * runsNeeded);
+            const nextPath = [...path, itemName];
+            recipe.ingredients.forEach(ing => {
+                calculateTotalRequirements(ing.item, ing.qty * runsNeeded, rawTotals, totalCost, nextPath);
+            });
+        }
+
+        // Recursive Tree Builder with Gold Calculation
+        function buildTreeHTML(itemName, amountNeeded, path = []) {
+            const recipe = recipes[itemName];
+            let goldDisplay = "";
+            let runsNeeded = 0;
+
+            if (recipe) {
+                runsNeeded = Math.ceil(amountNeeded / recipe.yield);
+                const stepGold = recipe.coins * runsNeeded;
+                goldDisplay = `<span class="tree-gold">${stepGold.toLocaleString()}g</span>`;
+            }
+
+            let html = `<div class="tree-node">
+                <div class="tree-label">
+                    <span><strong>${itemName}</strong> <i class="tree-qty">x${Math.ceil(amountNeeded)}</i></span>
+                    ${goldDisplay}
+                </div>`;
+
+            if (recipe && !path.includes(itemName)) {
+                const nextPath = [...path, itemName];
+                recipe.ingredients.forEach(ing => {
+                    html += buildTreeHTML(ing.item, ing.qty * runsNeeded, nextPath);
+                });
+            }
+            html += `</div>`;
+            return html;
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('myCraftingQueue', JSON.stringify(craftingQueue));
+            updateDisplay();
+        }
+
+        function renderAvailableItems() {
+            const container = document.getElementById('available-items');
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            container.innerHTML = '';
+            Object.keys(recipes).sort().forEach(name => {
+                if (name.toLowerCase().includes(searchTerm)) {
+                    const div = document.createElement('div');
+                    div.className = 'item-row';
+                    div.innerHTML = `<span>${name}</span><button onclick="addToQueue('${name}')">+</button>`;
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        function addToQueue(name) {
+            craftingQueue[name] = (craftingQueue[name] || 0) + 1;
+            saveAndRender();
+        }
+
+        // Tooltip logic
+        function showTooltip(e, name, qty) {
+            const localRaw = {}; const localCost = { value: 0 };
+            calculateTotalRequirements(name, qty, localRaw, localCost);
+            let html = `<h4 style="margin:0 0 10px 0; color:var(--accent);">${name} Raw Materials</h4><ul style="list-style:none; padding:0; margin:0; font-size:0.85rem;">`;
+            Object.entries(localRaw).forEach(([k, v]) => html += `<li style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${k}</span><span>${Math.ceil(v)}</span></li>`);
+            html += `</ul><div style="margin-top:10px; border-top:1px solid #333; padding-top:5px; text-align:right; color:var(--gold);">Total Batch Gold: ${localCost.value.toLocaleString()}</div>`;
+            tooltip.innerHTML = html;
+            tooltip.style.display = 'block';
+            moveTooltip(e);
+        }
+
+        function moveTooltip(e) {
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        }
+
+        function updateDisplay() {
+            const queueList = document.getElementById('queue-list');
+            const treeContainer = document.getElementById('tree-root-container');
+            const costText = document.getElementById('total-cost');
+            
+            queueList.innerHTML = '';
+            treeContainer.innerHTML = '';
+            let globalCost = { value: 0 };
+            let globalRaw = {};
+
+            Object.entries(craftingQueue).forEach(([name, qty]) => {
+                // Queue Row (Left side)
+                const div = document.createElement('div');
+                div.className = 'item-row queue-item-row';
+                div.innerHTML = `<span>${name}</span><div class="queue-controls">
+                    <input type="number" class="qty-input" value="${qty}" min="1" onchange="updateQty('${name}', this.value)">
+                    <button class="remove-btn" onclick="removeItem('${name}')">×</button>
+                </div>`;
+                div.onmouseenter = (e) => showTooltip(e, name, qty);
+                div.onmousemove = moveTooltip;
+                div.onmouseleave = () => tooltip.style.display = 'none';
+                queueList.appendChild(div);
+
+                // Tree Construction (Right side)
+                const rootNode = document.createElement('div');
+                rootNode.className = 'tree-node tree-root';
+                rootNode.innerHTML = buildTreeHTML(name, qty);
+                treeContainer.appendChild(rootNode);
+
+                calculateTotalRequirements(name, qty, globalRaw, globalCost);
+            });
+
+            costText.innerText = globalCost.value.toLocaleString(undefined, {minimumFractionDigits: 2}) + "g";
+        }
+
+        window.updateQty = (name, val) => {
+            const v = parseInt(val);
+            if (v > 0) craftingQueue[name] = v; else delete craftingQueue[name];
+            saveAndRender();
+        };
+
+        window.removeItem = (name) => { delete craftingQueue[name]; saveAndRender(); tooltip.style.display = 'none'; };
+
+        document.getElementById('clear-all-btn').onclick = () => { if(confirm("Clear queue?")) { craftingQueue = {}; saveAndRender(); } };
+
+        window.onload = () => { safeLoad(); renderAvailableItems(); updateDisplay(); };
+    </script>
+</body>
+</html>
